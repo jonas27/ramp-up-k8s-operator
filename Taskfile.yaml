@@ -1,0 +1,28 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task -l
+    silent: true
+
+  manifest:
+    desc: Reproduce manifests
+    cmds:
+      - make manifests
+      - make install
+
+  lint:
+    desc: Lint all go files in DIR.
+    cmds:
+      - golangci-lint run --timeout 10m0s --fix internal/...
+
+  test:
+    desc: Test all go files in DIR.
+    cmds:
+      - go test ./...
+
+  run:
+    desc: Run operator in current context
+    cmds:
+      - make run
