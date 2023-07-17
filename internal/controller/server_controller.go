@@ -19,13 +19,10 @@ package controller
 import (
 	"context"
 	"fmt"
-	"reflect"
 
 	"github.com/go-logr/logr"
 	rampupv1alpha1 "github.com/jonas27/ramp-up-k8s-operator/api/v1alpha1"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -61,7 +58,6 @@ var (
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.15.0/pkg/reconcile
 func (r *ServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	r.log = log.FromContext(ctx)
-
 	r.log.Info("start reconcile for", "name", req.Name)
 
 	var server rampupv1alpha1.Server
@@ -69,102 +65,76 @@ func (r *ServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, client.IgnoreNotFound(fmt.Errorf("unable to fetch Server: %w", err))
 	}
 
-	desiredService := v1.Service{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Service",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      server.Name,
-			Namespace: server.Namespace,
-			Labels:    server.Spec.Selector,
-		},
-		Spec: v1.ServiceSpec{
-			Ports:    []v1.ServicePort{{Port: server.Spec.ServicePort, TargetPort: intstr.FromInt(int(server.Spec.ContainerPort))}},
-			Selector: server.Spec.Selector,
-		}}
-	if err := controllerutil.SetControllerReference(&server, &desiredService, r.Scheme); err != nil {
-		return ctrl.Result{}, fmt.Errorf("unable to set control of servive: %w", err)
-	}
-
-	foundService := v1.Service{}
-	if err := r.Get(ctx, client.ObjectKeyFromObject(&desiredService), &foundService); err != nil {
-		// create the desired pod if the pod doesn't exist already
-		if errors.IsNotFound(err) {
-			if err = r.Create(ctx, &desiredService); err != nil {
-				return ctrl.Result{}, err
-			}
-		}
-	}
-	// pod was found
-	// validate the labels of the found pod
-	foundLabels := foundService.Labels
-	updateService := false
-	// if the foundLabels match the expectedLabels, no need to do anything: just exit peacefully
-	if !reflect.DeepEqual(server.Spec.Selector, foundLabels) {
-		updateService = true
-		// else, update the foundPod with expectedLabels
-		foundService.Labels = server.Spec.Selector
-	}
-	foundSpec := foundService.Spec
-	// if the foundLabels match the expectedLabels, no need to do anything: just exit peacefully
-	if !reflect.DeepEqual(desiredService.Spec, foundSpec) {
-		updateService = true
-		// else, update the foundPod with expectedLabels
-		foundService.Spec = desiredService.Spec
-	}
-
-	if updateService {
-		if err := r.Update(ctx, &foundService); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
-
-	desiredPod := v1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Pod",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      server.Name,
-			Namespace: server.Namespace,
-			Labels:    server.Spec.Selector,
-		},
-		Spec: v1.PodSpec{
-			Containers: []v1.Container{{
-				Name:  server.Name,
-				Ports: []v1.ContainerPort{{ContainerPort: server.Spec.ContainerPort}},
-				Image: server.Spec.Image,
-			}}}}
-	if err := controllerutil.SetControllerReference(&server, &desiredPod, r.Scheme); err != nil {
-		return ctrl.Result{}, fmt.Errorf("unable to set control of pod: %w", err)
-	}
-
-	foundPod := v1.Pod{}
-	if err := r.Get(ctx, client.ObjectKeyFromObject(&desiredPod), &foundPod); err != nil {
-		// create the desired pod if the pod doesn't exist already
-		if errors.IsNotFound(err) {
-			return ctrl.Result{}, r.Create(ctx, &desiredPod)
-		}
+	if err := r.reconcileService(ctx, server); err != nil {
 		return ctrl.Result{}, err
 	}
-	// pod was found
-	// validate the labels of the found pod
-	foundLabels = foundPod.Labels
-	// if the foundLabels match the expectedLabels, no need to do anything: just exit peacefully
-	if reflect.DeepEqual(server.Spec.Selector, foundLabels) {
-		return ctrl.Result{}, nil
+	if err := r.reconcilePod(ctx, server); err != nil {
+		return ctrl.Result{}, err
 	}
+	return ctrl.Result{}, nil
+}
 
-	// else, update the foundPod with expectedLabels
-	foundPod.Labels = server.Spec.Selector
-	return ctrl.Result{}, r.Update(ctx, &foundPod)
+// CreateOrUpdate infos here https://github.com/pivotal/blog/blob/master/content/post/gp4k-kubebuilder-lessons.md
+func (r *ServerReconciler) reconcileService(ctx context.Context, server rampupv1alpha1.Server) error {
+	var service v1.Service
+	service.Name = server.Name
+	service.Namespace = server.Namespace
+	op, err := ctrl.CreateOrUpdate(ctx, r.Client, &service, func() error {
+		modifyService(server, &service)
+		return ctrl.SetControllerReference(&server, &service, r.Scheme)
+	})
+	if err != nil {
+		return fmt.Errorf("could not create or update service: %w", err)
+	}
+	if op != controllerutil.OperationResultNone {
+		r.log.Info("reconcile service successfully", "op", op)
+	}
+	return nil
+}
+
+func modifyService(server rampupv1alpha1.Server, service *v1.Service) {
+	service.Labels = server.Spec.Selector
+	service.Spec = v1.ServiceSpec{
+		Ports:    []v1.ServicePort{{Port: server.Spec.ServicePort, TargetPort: intstr.FromInt(int(server.Spec.ContainerPort))}},
+		Selector: server.Spec.Selector,
+	}
+}
+
+// CreateOrUpdate infos here https://github.com/pivotal/blog/blob/master/content/post/gp4k-kubebuilder-lessons.md
+func (r *ServerReconciler) reconcilePod(ctx context.Context, server rampupv1alpha1.Server) error {
+	var pod v1.Pod
+	pod.Name = server.Name
+	pod.Namespace = server.Namespace
+	op, err := ctrl.CreateOrUpdate(ctx, r.Client, &pod, func() error {
+		modifyPod(server, &pod)
+		return ctrl.SetControllerReference(&server, &pod, r.Scheme)
+	})
+	if err != nil {
+		return fmt.Errorf("could not create or update pod: %w", err)
+	}
+	if op != controllerutil.OperationResultNone {
+		r.log.Info("reconcile pod successfully", "op", op)
+	}
+	return nil
+}
+
+func modifyPod(server rampupv1alpha1.Server, pod *v1.Pod) {
+	pod.Labels = server.Spec.Selector
+	podSpec := &pod.Spec
+	if len(podSpec.Containers) == 0 {
+		podSpec.Containers = make([]v1.Container, 1)
+		podSpec.Containers[0] = v1.Container{
+			Name:  server.Name,
+			Ports: []v1.ContainerPort{{ContainerPort: server.Spec.ContainerPort}},
+		}
+	}
+	podSpec.Containers[0].Image = server.Spec.Image
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&rampupv1alpha1.Server{}).
-		Owns(&v1.Pod{}).Owns(&v1.Service{}).
+		Owns(&v1.Service{}).Owns(&v1.Pod{}).
 		Complete(r)
 }
