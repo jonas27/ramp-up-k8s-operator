@@ -12,13 +12,13 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-var _ = Describe("CronJob controller", func() {
+var _ = Describe("Server controller", func() {
 	const (
-		name      = "test-cronjob"
+		name      = "test-server"
 		namespace = "default"
 	)
 
-	Context("When updating Server Status", func() {
+	Context("When creating Server", func() {
 		It("Should create server", func() {
 			By("")
 			ctx := context.Background()

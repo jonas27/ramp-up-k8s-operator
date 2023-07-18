@@ -52,14 +52,10 @@ func (r *ServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if err := r.Get(ctx, req.NamespacedName, &server); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(fmt.Errorf("unable to fetch Server: %w", err))
 	}
-
 	if err := r.reconcileService(ctx, server); err != nil {
 		return ctrl.Result{}, err
 	}
-	if err := r.reconcilePod(ctx, server); err != nil {
-		return ctrl.Result{}, err
-	}
-	return ctrl.Result{}, nil
+	return ctrl.Result{}, r.reconcilePod(ctx, server)
 }
 
 // CreateOrUpdate infos here https://github.com/pivotal/blog/blob/master/content/post/gp4k-kubebuilder-lessons.md
@@ -75,7 +71,7 @@ func (r *ServerReconciler) reconcileService(ctx context.Context, server rampupv1
 		return fmt.Errorf("could not create or update service: %w", err)
 	}
 	if op != controllerutil.OperationResultNone {
-		r.log.Info("reconcile service successfully", "op", op)
+		r.log.Info("reconcile service successfully", "operation", op)
 	}
 	return nil
 }
@@ -104,7 +100,7 @@ func (r *ServerReconciler) reconcilePod(ctx context.Context, server rampupv1alph
 		return fmt.Errorf("could not create or update pod: %w", err)
 	}
 	if op != controllerutil.OperationResultNone {
-		r.log.Info("reconcile pod successfully", "op", op)
+		r.log.Info("reconcile pod successfully", "operation", op)
 	}
 	return nil
 }
