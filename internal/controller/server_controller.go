@@ -21,14 +21,15 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	rampupv1alpha1 "github.com/jonas27/ramp-up-k8s-operator/api/v1alpha1"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	rampupv1alpha1 "github.com/jonas27/ramp-up-k8s-operator/api/v1alpha1"
 )
 
 // ServerReconciler reconciles a Server object.
@@ -60,7 +61,7 @@ func (r *ServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 // CreateOrUpdate infos here https://github.com/pivotal/blog/blob/master/content/post/gp4k-kubebuilder-lessons.md
 func (r *ServerReconciler) reconcileService(ctx context.Context, server rampupv1alpha1.Server) error {
-	var service v1.Service
+	var service corev1.Service
 	service.Name = server.Name
 	service.Namespace = server.Namespace
 	op, err := ctrl.CreateOrUpdate(ctx, r.Client, &service, func() error {
@@ -76,10 +77,10 @@ func (r *ServerReconciler) reconcileService(ctx context.Context, server rampupv1
 	return nil
 }
 
-func modifyService(server rampupv1alpha1.Server, service *v1.Service) {
+func modifyService(server rampupv1alpha1.Server, service *corev1.Service) {
 	service.Labels = server.Spec.Selector
-	service.Spec = v1.ServiceSpec{
-		Ports: []v1.ServicePort{{
+	service.Spec = corev1.ServiceSpec{
+		Ports: []corev1.ServicePort{{
 			Port:       server.Spec.ServicePort,
 			TargetPort: intstr.FromInt(int(server.Spec.ContainerPort)),
 		}},
@@ -89,7 +90,7 @@ func modifyService(server rampupv1alpha1.Server, service *v1.Service) {
 
 // CreateOrUpdate infos here https://github.com/pivotal/blog/blob/master/content/post/gp4k-kubebuilder-lessons.md
 func (r *ServerReconciler) reconcilePod(ctx context.Context, server rampupv1alpha1.Server) error {
-	var pod v1.Pod
+	var pod corev1.Pod
 	pod.Name = server.Name
 	pod.Namespace = server.Namespace
 	op, err := ctrl.CreateOrUpdate(ctx, r.Client, &pod, func() error {
@@ -105,14 +106,14 @@ func (r *ServerReconciler) reconcilePod(ctx context.Context, server rampupv1alph
 	return nil
 }
 
-func modifyPod(server rampupv1alpha1.Server, pod *v1.Pod) {
+func modifyPod(server rampupv1alpha1.Server, pod *corev1.Pod) {
 	pod.Labels = server.Spec.Selector
 	podSpec := &pod.Spec
 	if len(podSpec.Containers) == 0 {
-		podSpec.Containers = make([]v1.Container, 1)
-		podSpec.Containers[0] = v1.Container{
+		podSpec.Containers = make([]corev1.Container, 1)
+		podSpec.Containers[0] = corev1.Container{
 			Name:  server.Name,
-			Ports: []v1.ContainerPort{{ContainerPort: server.Spec.ContainerPort}},
+			Ports: []corev1.ContainerPort{{ContainerPort: server.Spec.ContainerPort}},
 		}
 	}
 	podSpec.Containers[0].Image = server.Spec.Image
@@ -122,6 +123,6 @@ func modifyPod(server rampupv1alpha1.Server, pod *v1.Pod) {
 func (r *ServerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&rampupv1alpha1.Server{}).
-		Owns(&v1.Service{}).Owns(&v1.Pod{}).
+		Owns(&corev1.Service{}).Owns(&corev1.Pod{}).
 		Complete(r)
 }

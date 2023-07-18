@@ -4,12 +4,13 @@ import (
 	"context"
 	"reflect"
 
-	rampupv1alpha1 "github.com/jonas27/ramp-up-k8s-operator/api/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+
+	rampupv1alpha1 "github.com/jonas27/ramp-up-k8s-operator/api/v1alpha1"
 )
 
 var _ = Describe("Server controller", func() {
@@ -46,13 +47,13 @@ var _ = Describe("Server controller", func() {
 			}).Should(BeTrue())
 
 			By("By creating a new Pod")
-			testPod := &v1.Pod{
+			testPod := &corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      name,
 					Namespace: namespace,
 				},
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
 						{
 							Name:  "test-container",
 							Image: "test-image",
@@ -60,7 +61,7 @@ var _ = Describe("Server controller", func() {
 					},
 				},
 			}
-			kind := reflect.TypeOf(v1.Pod{}).Name()
+			kind := reflect.TypeOf(corev1.Pod{}).Name()
 			gvk := rampupv1alpha1.GroupVersion.WithKind(kind)
 
 			controllerRef := metav1.NewControllerRef(createdServer, gvk)
