@@ -13,7 +13,6 @@ import (
 )
 
 var _ = Describe("CronJob controller", func() {
-
 	const (
 		name      = "test-cronjob"
 		namespace = "default"
@@ -67,7 +66,6 @@ var _ = Describe("CronJob controller", func() {
 			controllerRef := metav1.NewControllerRef(createdServer, gvk)
 			testPod.SetOwnerReferences([]metav1.OwnerReference{*controllerRef})
 			Expect(k8sClient.Create(ctx, testPod)).Should(Succeed())
-
 		})
 	})
 })

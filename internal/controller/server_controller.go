@@ -38,22 +38,10 @@ type ServerReconciler struct {
 	log    logr.Logger
 }
 
-var (
-	jobOwnerKey = ".metadata.controller"
-	apiGVStr    = rampupv1alpha1.GroupVersion.String()
-)
-
 //+kubebuilder:rbac:groups=ramp-up.joe.ionos.io,resources=servers,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ramp-up.joe.ionos.io,resources=servers/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=ramp-up.joe.ionos.io,resources=servers/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Server object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.15.0/pkg/reconcile
 func (r *ServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -95,7 +83,10 @@ func (r *ServerReconciler) reconcileService(ctx context.Context, server rampupv1
 func modifyService(server rampupv1alpha1.Server, service *v1.Service) {
 	service.Labels = server.Spec.Selector
 	service.Spec = v1.ServiceSpec{
-		Ports:    []v1.ServicePort{{Port: server.Spec.ServicePort, TargetPort: intstr.FromInt(int(server.Spec.ContainerPort))}},
+		Ports: []v1.ServicePort{{
+			Port:       server.Spec.ServicePort,
+			TargetPort: intstr.FromInt(int(server.Spec.ContainerPort)),
+		}},
 		Selector: server.Spec.Selector,
 	}
 }

@@ -142,7 +142,7 @@ linters:
         - tagliatelle
         - tenv
         - testableexamples
-        - testpackage
+        # - testpackage
         - thelper
         - tparallel
         - typecheck
@@ -153,6 +153,6 @@ linters:
         # - varnamelen
         - wastedassign
         - whitespace
-        - wrapcheck
+        # - wrapcheck
         # - wsl
         - zerologlint

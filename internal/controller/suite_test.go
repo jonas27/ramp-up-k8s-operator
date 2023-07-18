@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+//nolint:gochecknoglobals
 package controller
 
 import (
@@ -21,13 +22,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	rampupv1alpha1 "github.com/jonas27/ramp-up-k8s-operator/api/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -45,7 +45,7 @@ var (
 	cancel    context.CancelFunc
 )
 
-func TestControllers(t *testing.T) {
+func TestControllers(t *testing.T) { //nolint:paralleltest
 	RegisterFailHandler(Fail)
 
 	RunSpecs(t, "Controller Suite")
