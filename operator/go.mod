@@ -1,4 +1,4 @@
-module github.com/jonas27/ramp-up-k8s-operator
+module github.com/jonas27/ramp-up-k8s-operator/operator
 
 go 1.20
 
