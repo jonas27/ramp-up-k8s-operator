@@ -29,7 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	rampupv1alpha1 "github.com/jonas27/ramp-up-k8s-operator/api/v1alpha1"
+	rampupv1alpha1 "github.com/jonas27/ramp-up-k8s-operator/operator/api/v1alpha1"
 )
 
 // ServerReconciler reconciles a Server object.

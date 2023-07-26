@@ -20,8 +20,8 @@ import (
 	"flag"
 	"os"
 
-	rampupv1alpha1 "github.com/jonas27/ramp-up-k8s-operator/api/v1alpha1"
-	"github.com/jonas27/ramp-up-k8s-operator/internal/controller"
+	rampupv1alpha1 "github.com/jonas27/ramp-up-k8s-operator/operator/api/v1alpha1"
+	"github.com/jonas27/ramp-up-k8s-operator/operator/internal/controller"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
