@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>{{.Title}}</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: auto;
+      max-width: 800px;
+    }
+
+    .centered-content {
+      text-align: center;
+    }
+
+    .large-form input,
+    .large-form select,
+    .large-form textarea {
+      display: block;
+      /* width: 100%; */
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 16px;
+      width: 300px;
+      max-width: 700px;
+    }
+
+    .large-form label,
+    .large-form input[type="submit"] {
+      margin: auto;
+      width: auto;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="centered-content large-form">
+    <h1>{{.Title}}</h1>
+    <br><br>
+    <form action="/submit" method="post">
+      <label for="text">Text:</label>
+      <textarea id="text" name="text"></textarea><br>
+      <br>
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+</body>
+
+</html>
