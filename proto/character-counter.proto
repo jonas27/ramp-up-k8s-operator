@@ -8,12 +8,12 @@ service CharacterCounter {
   rpc CountCharacters (CountCharactersRequest) returns (CountCharactersResponse) {}
 }
 
-// The request message containing the user's name.
+// The request message containing the text
 message CountCharactersRequest {
-  string name = 1;
+  string text = 1;
 }
 
-// The response message containing the greetings
+// The response message containing the number characters
 message CountCharactersResponse {
-  string message = 1;
+  uint64 characters = 1;
 }
