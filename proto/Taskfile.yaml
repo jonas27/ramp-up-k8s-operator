@@ -9,4 +9,5 @@ tasks:
   proto:
     desc: Update proto files
     cmds:
-      - protoc --go_out=. --go-grpc_out=. proto/character-counter.proto
+      - protoc --go_out=. --go-grpc_out=. character-counter.proto
+      - go mod tidy
