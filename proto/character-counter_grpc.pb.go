@@ -4,7 +4,7 @@
 // - protoc             v3.12.4
 // source: character-counter.proto
 
-package proto
+package __
 
 import (
 	context "context"
