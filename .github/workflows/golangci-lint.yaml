@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   golangci:
-    name: lint
+    name: frontend-lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -28,7 +28,7 @@ jobs:
           version: v1.53
 
           # Optional: working directory, useful for monorepos
-          working-directory: ./internal/controller
+          working-directory: ./frontend
 
           # Optional: golangci-lint command line arguments.
           #
