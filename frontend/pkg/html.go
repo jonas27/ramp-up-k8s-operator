@@ -32,7 +32,7 @@ func (s *Server) html() func(http.ResponseWriter, uint64) {
 	return func(w http.ResponseWriter, characters uint64) {
 		if s.Debug {
 			if page, err = s.addHTMLTemplate("index.html"); err != nil {
-				panic(err)
+				s.Log.Error("can't load html page", "error", err)
 			}
 			s.Log.Warn("reloading static conent. Should not be used in production")
 		}

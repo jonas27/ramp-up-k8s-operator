@@ -35,4 +35,3 @@ tasks:
       - go tool cover -html=coverage.out -o coverage.html
       - rm coverage.out
       - brave-browser coverage.html
-      - rm coverage.html
