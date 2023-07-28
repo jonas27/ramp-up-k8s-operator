@@ -1,0 +1,13 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task -l
+    silent: true
+
+  proto:
+    desc: Update proto files
+    cmds:
+      - protoc --go_out=. --go-grpc_out=. character-counter.proto
+      - go mod tidy

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "./proto";
+
+package frontend;
+
+service CharacterCounter {
+  rpc CountCharacters (CountCharactersRequest) returns (CountCharactersResponse) {}
+}
+
+// The request message containing the user's name.
+message CountCharactersRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message CountCharactersResponse {
+  string message = 1;
+}
