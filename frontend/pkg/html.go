@@ -3,14 +3,17 @@ package pkg
 import (
 	"compress/gzip"
 	"embed"
+	"fmt"
 	"html/template"
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 
 	"github.com/tdewolff/minify/v2"
 	"github.com/tdewolff/minify/v2/css"
 	"github.com/tdewolff/minify/v2/html"
+	"github.com/tdewolff/minify/v2/js"
 	"golang.org/x/exp/slog"
 )
 
@@ -19,13 +22,19 @@ import (
 //go:embed templates/*
 var templates embed.FS
 
-// rootGet expose a minimalistic html page
-func (s *Server) rootGet() func(w http.ResponseWriter) {
+// html expose a minimalistic html page.
+func (s *Server) html() func(http.ResponseWriter, uint64) {
 	// cache template
-	page := s.addHTMLTemplate("index.html")
-	return func(w http.ResponseWriter) {
+	page, err := s.addHTMLTemplate("index.html")
+	if err != nil {
+		panic(err)
+	}
+	return func(w http.ResponseWriter, characters uint64) {
 		if s.Debug {
-			page = s.addHTMLTemplate("index.html")
+			if page, err = s.addHTMLTemplate("index.html"); err != nil {
+				panic(err)
+			}
+			s.Log.Warn("reloading static conent. Should not be used in production")
 		}
 
 		w.Header().Set("Content-Encoding", "gzip")
@@ -35,21 +44,18 @@ func (s *Server) rootGet() func(w http.ResponseWriter) {
 		defer gz.Close()
 
 		data := struct {
-			Title string
-		}{Title: "Character counter"}
+			Title      string
+			Characters uint64
+		}{"Character counter", characters}
 
 		if err := page.Execute(gz, data); err != nil {
-			slog.Error(err.Error())
+			slog.Error("Error executing html template", "error", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-
 		}
 	}
 }
 
-func (s *Server) addHTMLTemplate(name string) *template.Template {
-	m := minify.New()
-	m.AddFunc("text/html", html.Minify)
-	m.AddFunc("text/css", css.Minify)
+func (s *Server) addHTMLTemplate(name string) (*template.Template, error) {
 	name = path.Join(s.TemplatePath, name)
 
 	var bytes []byte
@@ -58,25 +64,30 @@ func (s *Server) addHTMLTemplate(name string) *template.Template {
 	if s.Debug {
 		bytes, err = os.ReadFile(name)
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("error reading file: %s and error %w", name, err)
 		}
 	} else {
 		bytes, err = templates.ReadFile(name)
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("error reading file: %s and error %w", name, err)
 		}
 	}
 
+	m := minify.New()
+	m.AddFunc("text/html", html.Minify)
+	m.AddFunc("text/css", css.Minify)
+	m.AddFuncRegexp(regexp.MustCompile("^(application|text)/(x-)?(java|ecma)script$"), js.Minify)
+
 	bytes, err = m.Bytes("text/html", bytes)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("error minifying file: %s with content: %s and error: %w", name, string(bytes), err)
 	}
 
 	tmpl := template.New(name)
 	tmpl, err = tmpl.Parse(string(bytes))
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("error parsing file: %s with content: %s and error: %w", name, string(bytes), err)
 	}
 
-	return tmpl
+	return tmpl, nil
 }

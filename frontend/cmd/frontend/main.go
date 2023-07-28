@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/jonas27/ramp-up-k8s-operator/frontend/pkg"
 	"golang.org/x/exp/slog"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -18,15 +23,15 @@ const (
 )
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{AddSource: true}))
+	log := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{AddSource: true}))
 
-	if err := run(os.Args, logger); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	if err := run(os.Args, log); err != nil {
+		log.Error(err.Error())
 		os.Exit(exitFail)
 	}
 }
 
-func run(args []string, log *slog.Logger) error { //nolint:cyclop,funlen
+func run(args []string, log *slog.Logger) error {
 	flags := flag.NewFlagSet(args[0], flag.ExitOnError)
 
 	addr := flags.String("addr", ":8080", "The server addr with colon")
@@ -40,11 +45,37 @@ func run(args []string, log *slog.Logger) error { //nolint:cyclop,funlen
 	server := pkg.Server{
 		Debug: *debug,
 		Log:   log,
-		Mux:   http.NewServeMux(),
 		Server: &http.Server{
 			Addr:              *addr,
 			ReadHeaderTimeout: serverTimeoutSeconds * time.Second,
 		},
-		TemplatePath: *templatePath}
-	return server.Serve()
+		TemplatePath: *templatePath,
+	}
+	server.Routes()
+
+	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	errWg, errCtx := errgroup.WithContext(ctx)
+
+	errWg.Go(func() error {
+		log.Info("Server running", "address", *addr)
+		if err := server.Server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			return fmt.Errorf("the server failed with error: %w", err)
+		}
+		return nil
+	})
+
+	errWg.Go(func() error {
+		<-errCtx.Done()
+		if err := server.Server.Shutdown(errCtx); err != nil {
+			return fmt.Errorf("could not shutdown server gracefully: %w", err)
+		}
+		return nil
+	})
+
+	err := errWg.Wait()
+	if !errors.Is(err, context.Canceled) && err != nil {
+		return fmt.Errorf("server error: %w", err)
+	}
+	server.Log.Info("server quit gracefully")
+	return nil
 }

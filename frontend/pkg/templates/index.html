@@ -14,39 +14,58 @@
 
     .centered-content {
       text-align: center;
+      width: 100%;
     }
 
-    .large-form input,
-    .large-form select,
+    .title {
+      margin-bottom: 40px;
+    }
+
     .large-form textarea {
       display: block;
-      /* width: 100%; */
+      align-items: center;
       margin-bottom: 10px;
       padding: 10px;
       font-size: 16px;
-      width: 300px;
-      max-width: 700px;
+      max-width: 90%;
+      width: 100%;
+      margin: auto;
     }
 
-    .large-form label,
+    .large-form label {
+      display: block;
+      margin: auto;
+      margin-bottom: 10px;
+      width: auto;
+      padding: 10px 20px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
     .large-form input[type="submit"] {
       margin: auto;
+      margin-top: 10px;
       width: auto;
       padding: 10px 20px;
       font-size: 18px;
       cursor: pointer;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/gh/akjpro/form-anticlear/base.js"></script>
 </head>
 
 <body>
   <div class="centered-content large-form">
-    <h1>{{.Title}}</h1>
-    <br><br>
-    <form action="/submit" method="post">
-      <label for="text">Text:</label>
-      <textarea id="text" name="text"></textarea><br>
-      <br>
+    <h1 class="title">{{.Title}}</h1>
+
+    <form action="/" method="post" enctype="multipart/form-data" class="form-anticlear">
+      <label for="text" class="textarea-title">Text:</label>
+      <textarea id="text" name="text" required></textarea><br>
+
+      {{if ne .Characters 0}}
+      <p>Characters: {{.Characters}}</p>
+      {{end}}
+
       <input type="submit" value="Submit">
     </form>
   </div>
