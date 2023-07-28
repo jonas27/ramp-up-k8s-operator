@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"net/http"
+	"strings"
 
 	"golang.org/x/exp/slog"
 )
@@ -23,6 +24,10 @@ func (s *Server) Routes() {
 func (s *Server) root() http.HandlerFunc {
 	html := s.html()
 	return func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			http.Error(w, "enable gzip to use this", http.StatusNotAcceptable)
+			return
+		}
 		switch r.Method {
 		case http.MethodGet:
 			html(w, 0)
