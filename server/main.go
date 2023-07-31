@@ -79,8 +79,8 @@ func run(args []string, log *slog.Logger) error { //nolint:funlen,cyclop
 	}
 
 	// setup flags
-	grpcAddr := flags.String("grpc-addr", ":8000", "The server addr with colon")
-	httpAddr := flags.String("http-addr", ":8001", "The server addr with colon")
+	grpcAddr := flags.String("grpc-addr", ":8000", "The grpc server addr")
+	httpAddr := flags.String("http-addr", ":8001", "The http server addr")
 	if err := flags.Parse(args[1:]); err != nil {
 		return fmt.Errorf("failed to parse flags: %w", err)
 	}
@@ -147,7 +147,6 @@ func run(args []string, log *slog.Logger) error { //nolint:funlen,cyclop
 	errWg.Go(func() error {
 		defer stop()
 
-		log.Info("Server running", "address", *httpAddr)
 		m := http.NewServeMux()
 		// Create HTTP handler for Prometheus metrics.
 		m.Handle("/metrics", promhttp.HandlerFor(
@@ -158,7 +157,8 @@ func run(args []string, log *slog.Logger) error { //nolint:funlen,cyclop
 			},
 		))
 		httpSrv.Handler = m
-		log.Info("starting HTTP server", "addr", httpSrv.Addr)
+
+		log.Info("start http server", "address", *httpAddr)
 		if err := httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			return fmt.Errorf("the server failed with error: %w", err)
 		}
@@ -197,7 +197,6 @@ func setupOLTPTracing() (*stdout.Exporter, error) {
 }
 
 func setupMetrics() (*grpcprom.ServerMetrics, *prometheus.Registry, func(ctx context.Context) prometheus.Labels) {
-	// Setup metrics.
 	srvMetrics := grpcprom.NewServerMetrics(
 		grpcprom.WithServerHandlingTimeHistogram(
 			grpcprom.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),

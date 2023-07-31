@@ -9,7 +9,7 @@ tasks:
   run:
     desc: Run main.go with flags
     cmds:
-      - go run ./... -grpc-addr :8000 http-addr :8001
+      - go run ./... -grpc-addr locahost:8000 http-addr locahost:8001
 
   test:
     desc: Test all go files in DIR.
