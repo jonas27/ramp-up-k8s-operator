@@ -9,7 +9,7 @@ tasks:
   run:
     desc: Run main.go with flags
     cmds:
-      - go run ./... -templates-path "pkg/templates" -debug "true"
+      - go run ./... -templates-path "pkg/templates" -debug "true" -grpc-addr 8000
 
   test:
     desc: Test all go files in DIR.
