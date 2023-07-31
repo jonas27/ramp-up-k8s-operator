@@ -9,7 +9,7 @@ tasks:
   run:
     desc: Run main.go with flags
     cmds:
-      - go run main.go -grpc-addr ":8000" http-addr "locahost:8001"
+      - go run main.go -grpc-addr ":8000" http-addr ":8001"
 
   test:
     desc: Test all go files in DIR.
@@ -35,3 +35,8 @@ tasks:
       - go tool cover -html=coverage.out -o coverage.html
       - rm coverage.out
       - brave-browser coverage.html
+
+  build:
+    desc: Build docker
+    cmds:
+      - docker build -t ramp-up-k8s-operator/server:v0.0.1 ./
