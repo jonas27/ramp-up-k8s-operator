@@ -37,8 +37,7 @@ import (
 
 const (
 	exitFail             = 1
-	serverTimeoutSeconds = 3
-	component            = "grpc-example"
+	serverTimeoutSeconds = 10
 )
 
 // interceptorLogger adapts slog logger to interceptor logger.
@@ -142,7 +141,8 @@ func run(args []string, log *slog.Logger) error { //nolint:funlen,cyclop
 	})
 
 	// setup http server
-	httpSrv := &http.Server{Addr: *httpAddr, ReadTimeout: serverTimeoutSeconds}
+	// super interesting, does not work with header timeout defined
+	httpSrv := &http.Server{Addr: *httpAddr, ReadTimeout: serverTimeoutSeconds} 
 
 	errWg.Go(func() error {
 		defer stop()
