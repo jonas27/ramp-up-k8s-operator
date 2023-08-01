@@ -142,7 +142,7 @@ func run(args []string, log *slog.Logger) error { //nolint:funlen,cyclop
 
 	// setup http server
 	// super interesting, does not work with header timeout defined
-	httpSrv := &http.Server{Addr: *httpAddr, ReadTimeout: serverTimeoutSeconds}
+	httpSrv := &http.Server{Addr: *httpAddr}
 
 	errWg.Go(func() error {
 		defer stop()
