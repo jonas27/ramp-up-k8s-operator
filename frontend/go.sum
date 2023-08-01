@@ -10,6 +10,7 @@ github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaS
 github.com/golang/protobuf v1.5.3 h1:KhyjKVUg7Usr/dYsdSqoFveMYd5ko72D+zANwlG1mmg=
 github.com/golang/protobuf v1.5.3/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
+github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
 github.com/jonas27/ramp-up-k8s-operator/proto v0.0.0-20230730121354-d1992c5f2676 h1:H2WZNgBUmYSMJCgKg61QGxITvDfc47Ul9o6maODu8bU=
 github.com/jonas27/ramp-up-k8s-operator/proto v0.0.0-20230730121354-d1992c5f2676/go.mod h1:Mj1Z0//EVToc9CUdm1jQHYK0xDnykiRt5HEtwP7YZzI=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=

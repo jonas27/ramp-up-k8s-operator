@@ -35,3 +35,8 @@ tasks:
       - go tool cover -html=coverage.out -o coverage.html
       - rm coverage.out
       - brave-browser coverage.html
+
+  build:
+    desc: Build docker
+    cmds:
+      - docker build -t ramp-up-k8s-operator/frontend:v0.0.1 ./
