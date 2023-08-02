@@ -1,4 +1,4 @@
 ## Append samples of your project ##
 resources:
-- ramp-up_v1alpha1_server.yaml
+- ramp-up_v1alpha1_charactercounter.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

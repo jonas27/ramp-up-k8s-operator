@@ -5,8 +5,8 @@
 domain: joe.ionos.io
 layout:
 - go.kubebuilder.io/v4
-projectName: ramp-up-k8s-operator
-repo: github.com/jonas27/ramp-up-k8s-operator
+projectName: operator-v2
+repo: github.com/jonas27/ramp-up-k8s-operator/operator
 resources:
 - api:
     crdVersion: v1
@@ -14,7 +14,7 @@ resources:
   controller: true
   domain: joe.ionos.io
   group: ramp-up
-  kind: Server
-  path: github.com/jonas27/ramp-up-k8s-operator/api/v1alpha1
+  kind: CharacterCounter
+  path: github.com/jonas27/ramp-up-k8s-operator/operator/api/v1alpha1
   version: v1alpha1
 version: "3"

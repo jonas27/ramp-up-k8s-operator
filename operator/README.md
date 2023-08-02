@@ -9,7 +9,7 @@ Simple k8s operator with kubebuilder.
   * Configure port server listens on
   * Configure deployment replicas
   * Configure value returned by server
-* If the deployment is deleted manually, the controller should recreate it. 
+* If the deployment is deleted manually, the controller should recreate it.
   Note: Explore object ownership and finalizers.
 * The operator should create or delete all dependent resources if the CR is deleted.
 * Update the deployment when the CR is changed, e.g. return a different value from the server.
@@ -17,7 +17,7 @@ Simple k8s operator with kubebuilder.
 
 ## Commands
 ```bash
-kubebuilder init --domain joe.ionos.io --repo github.com/jonas27/ramp-up-k8s-operator
-kubebuilder create api --group ramp-up --version v1alpha1 --kind Server
+kubebuilder init --domain joe.ionos.io --repo github.com/jonas27/ramp-up-k8s-operator/operator
+kubebuilder create api --group ramp-up --version v1alpha1 --kind CharacterCounter
 
 ```

@@ -21,6 +21,7 @@ tasks:
     desc: Test all go files in DIR.
     cmds:
       - go test ./...
+      - task: lint
 
   run:
     desc: Run operator in current context

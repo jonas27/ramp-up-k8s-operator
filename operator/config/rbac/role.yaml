@@ -7,7 +7,7 @@ rules:
 - apiGroups:
   - ramp-up.joe.ionos.io
   resources:
-  - servers
+  - charactercounters
   verbs:
   - create
   - delete
@@ -19,13 +19,13 @@ rules:
 - apiGroups:
   - ramp-up.joe.ionos.io
   resources:
-  - servers/finalizers
+  - charactercounters/finalizers
   verbs:
   - update
 - apiGroups:
   - ramp-up.joe.ionos.io
   resources:
-  - servers/status
+  - charactercounters/status
   verbs:
   - get
   - patch
