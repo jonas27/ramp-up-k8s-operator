@@ -11,3 +11,4 @@ FROM alpine:3.18
 COPY --from=builder /server /server
 COPY --from=builder /etc/passwd /etc/passwd
 USER scratchuser
+CMD [ "/server" ]
