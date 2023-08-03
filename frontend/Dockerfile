@@ -13,3 +13,4 @@ FROM alpine:3.18
 COPY --from=builder /frontend /frontend
 COPY --from=builder /etc/passwd /etc/passwd
 USER scratchuser
+CMD [ "/frontendg" ]
