@@ -156,7 +156,7 @@ func run(args []string, log *slog.Logger) error { //nolint:funlen,cyclop
 				EnableOpenMetrics: true,
 			},
 		))
-		m.HandleFunc("/health",healthHandler())
+		m.HandleFunc("/health", healthHandler())
 		httpSrv.Handler = m
 
 		log.Info("start http server", "address", *httpAddr)
@@ -214,8 +214,8 @@ func setupMetrics() (*grpcprom.ServerMetrics, *prometheus.Registry, func(ctx con
 }
 
 func healthHandler() http.HandlerFunc {
-	return func (w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		// Check the health of the server and return a status code accordingly
-			w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusOK)
 	}
 }
