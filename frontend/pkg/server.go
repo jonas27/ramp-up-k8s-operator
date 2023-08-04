@@ -1,13 +1,10 @@
 package pkg
 
 import (
-	"context"
 	"net/http"
 	"strings"
-	"time"
 
 	pb "github.com/jonas27/ramp-up-k8s-operator/proto"
-
 	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -57,11 +54,8 @@ func (s *Server) root() http.HandlerFunc {
 			s.Log.Info("test", "addr", s.GRPCAddr)
 
 			client := pb.NewCharacterCounterClient(conn)
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-			defer cancel()
 
-			s.Log.Info("test1", "addr", s.GRPCAddr)
-			resp, err := client.CountCharacters(ctx, &pb.CountCharactersRequest{Text: text})
+			resp, err := client.CountCharacters(r.Context(), &pb.CountCharactersRequest{Text: text})
 			if err != nil {
 				s.Log.Error("errored during CountCharacters request", "error", err)
 				return
