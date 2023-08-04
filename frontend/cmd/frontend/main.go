@@ -35,7 +35,7 @@ func run(args []string, log *slog.Logger) error {
 	flags := flag.NewFlagSet(args[0], flag.ExitOnError)
 
 	addr := flags.String("addr", ":8080", "The addr with colon")
-	grpcAddr := flags.String("grpcAddr", ":8000", "The server addr with colon")
+	grpcAddr := flags.String("grpc-addr", ":8000", "The server addr with colon")
 	debug := flags.Bool("debug", false, "Start the server in debug mode")
 	templatePath := flags.String("templates-path", "templates/", "The path for html templates")
 
@@ -57,6 +57,7 @@ func run(args []string, log *slog.Logger) error {
 
 	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	errWg, errCtx := errgroup.WithContext(ctx)
+	log.Info("grpcAddr for dialing", "address", *grpcAddr)
 
 	errWg.Go(func() error {
 		log.Info("Server running", "address", *addr)
