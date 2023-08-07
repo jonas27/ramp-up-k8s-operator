@@ -1,9 +1,0 @@
-apiVersion: ramp-up.joe.ionos.io/v1alpha1
-kind: Server
-metadata:
-  name: nginx
-spec:
-  name: nginx
-  image: nginx:1.14.2
-  containerPort: 8080
-  servicePort: 30000
