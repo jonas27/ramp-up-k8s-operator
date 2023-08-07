@@ -1,0 +1,42 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task -l
+    silent: true
+
+  run:
+    desc: Run main.go with flags
+    cmds:
+      - go run ./... -templates-path "pkg/templates" -debug "true" -grpc-addr 8000
+
+  test:
+    desc: Test all go files in DIR.
+    cmds:
+      - CGO_ENABLED=1 go test ./... -race
+      - task: lint
+      - task: coverHTML
+
+  lint:
+    desc: Lint all go files in DIR.
+    cmds:
+      - golangci-lint run --fix --timeout 10m0s ./...
+
+  cover:
+    desc: Show test coverage
+    cmds:
+      - go test -cover ./...
+
+  coverHTML:
+    desc: Show test coverage
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+      - rm coverage.out
+      - brave-browser coverage.html
+
+  build:
+    desc: Build docker
+    cmds:
+      - docker build -t ramp-up-k8s-operator/frontend:v0.0.1 ./
