@@ -9,6 +9,7 @@ tasks:
   manifest:
     desc: Reproduce manifests
     cmds:
+      - make generate
       - make manifests
       - make install
 
@@ -27,3 +28,19 @@ tasks:
     desc: Run operator in current context
     cmds:
       - make run
+
+  apply:
+    desc: apply test crd
+    cmds:
+      - task manifest && kubectl replace --force -f test.yaml
+
+  port-forward:
+    desc: port-forward the frontend
+    cmds:
+      - kubectl port-forward service/frontend 8000:80 -n test
+
+  load-images:
+    desc: load local images into kind
+    cmds:
+      - kind load docker-image ramp-up-k8s-operator/frontend:v0.0.1
+      - kind load docker-image ramp-up-k8s-operator/server:v0.0.1
