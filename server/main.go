@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"encoding/binary"
 	"errors"
 	"flag"
 	"fmt"
@@ -63,7 +64,7 @@ type server struct {
 }
 
 func (s *server) CountCharacters(_ context.Context, req *pb.CountCharactersRequest) (*pb.CountCharactersResponse, error) { //nolint:lll
-	chars := uint64(len(req.Text))
+	chars := uint64(binary.BigEndian.Uint64([]byte(os.Getenv("CC_STRING"))))
 	return &pb.CountCharactersResponse{Characters: chars}, nil
 }
 
