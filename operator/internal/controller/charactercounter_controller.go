@@ -37,9 +37,9 @@ import (
 type CharacterCounterReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
-	log    logr.Logger
-	cc     *rampupv1alpha1.CharacterCounter
 }
+
+type CharacterCounterStep struct{}
 
 //+kubebuilder:rbac:groups=ramp-up.joe.ionos.io,resources=charactercounters,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ramp-up.joe.ionos.io,resources=charactercounters/status,verbs=get;update;patch
@@ -55,53 +55,51 @@ type CharacterCounterReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.15.0/pkg/reconcile
 func (r *CharacterCounterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	r.log = log.FromContext(ctx)
-	r.log.Info("start reconcile for", "name", req.Name)
+	log := log.FromContext(ctx)
+	log.Info("start reconcile for", "name", req.Name)
 
 	var cc rampupv1alpha1.CharacterCounter
 	if err := r.Get(ctx, req.NamespacedName, &cc); err != nil {
-		return ctrl.Result{}, client.IgnoreNotFound(fmt.Errorf("unable to fetch ChracterCounter CRD: %w", err))
+		return ctrl.Result{}, client.IgnoreNotFound(fmt.Errorf("unable to fetch ChracterCounter CR: %w", err))
 	}
 
 	if cc.Spec.Namespace == "" {
 		cc.Spec.Namespace = "default"
 	}
 
-	r.cc = &cc
-
-	r.log.Info("server reconcileService")
-	if err := r.reconcileService(ctx, cc.Spec.Server); err != nil {
+	log.Info("server reconcileService")
+	if err := r.reconcileService(ctx, log, cc, cc.Spec.Server); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	r.log.Info("server reconcileDeployment")
-	if err := r.reconcileDeployement(ctx, cc.Spec.Server, false); err != nil {
+	log.Info("server reconcileDeployment")
+	if err := r.reconcileDeployement(ctx, log, cc, cc.Spec.Server, false); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	r.log.Info("frontend reconcileService")
-	if err := r.reconcileService(ctx, cc.Spec.Frontend); err != nil {
+	log.Info("frontend reconcileService")
+	if err := r.reconcileService(ctx, log, cc, cc.Spec.Frontend); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	r.log.Info("frontend reconcileDeployment")
-	return ctrl.Result{}, r.reconcileDeployement(ctx, cc.Spec.Frontend, true)
+	log.Info("frontend reconcileDeployment")
+	return ctrl.Result{}, r.reconcileDeployement(ctx, log, cc, cc.Spec.Frontend, true)
 }
 
-func (r *CharacterCounterReconciler) reconcileService(ctx context.Context, component rampupv1alpha1.CharacterCounterComponent) error {
+func (r *CharacterCounterReconciler) reconcileService(ctx context.Context, log logr.Logger, cc rampupv1alpha1.CharacterCounter, component rampupv1alpha1.CharacterCounterComponent) error {
 	var service corev1.Service
 	service.Name = component.Name
-	service.Namespace = r.cc.Namespace
-	service.Labels = r.cc.Spec.Labels
+	service.Namespace = cc.Namespace
+	service.Labels = cc.Spec.Labels
 	op, err := ctrl.CreateOrUpdate(ctx, r.Client, &service, func() error {
-		modifyService(*r.cc, component, &service)
-		return ctrl.SetControllerReference(r.cc, &service, r.Scheme)
+		modifyService(cc, component, &service)
+		return ctrl.SetControllerReference(&cc, &service, r.Scheme)
 	})
 	if err != nil {
 		return fmt.Errorf("could not create or update service: %w", err)
 	}
 	if op != controllerutil.OperationResultNone {
-		r.log.Info("reconcile service successfully", "operation", op)
+		log.Info("reconcile service successfully", "operation", op)
 	}
 	return nil
 }
@@ -114,17 +112,17 @@ func modifyService(cc rampupv1alpha1.CharacterCounter, component rampupv1alpha1.
 	}
 }
 
-func (r *CharacterCounterReconciler) reconcileDeployement(ctx context.Context, component rampupv1alpha1.CharacterCounterComponent, frontend bool) error {
+func (r *CharacterCounterReconciler) reconcileDeployement(ctx context.Context, log logr.Logger, cc rampupv1alpha1.CharacterCounter, component rampupv1alpha1.CharacterCounterComponent, frontend bool) error {
 	args := []string{}
 	if frontend {
-		args = append(args, "-grpc-addr", fmt.Sprintf("%s:80", r.cc.Spec.Server.Name))
+		args = append(args, "-grpc-addr", fmt.Sprintf("%s:80", cc.Spec.Server.Name))
 	}
 	deployment := appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{APIVersion: appsv1.SchemeGroupVersion.String(), Kind: "Deployment"},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      component.Name,
-			Namespace: r.cc.Spec.Namespace,
-			Labels:    r.cc.Spec.Labels,
+			Namespace: cc.Spec.Namespace,
+			Labels:    cc.Spec.Labels,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: component.Replicas,
@@ -150,14 +148,14 @@ func (r *CharacterCounterReconciler) reconcileDeployement(ctx context.Context, c
 		},
 	}
 	op, err := ctrl.CreateOrUpdate(ctx, r.Client, &deployment, func() error {
-		modifyDeployment(*r.cc, component, &deployment, frontend)
-		return ctrl.SetControllerReference(r.cc, &deployment, r.Scheme)
+		modifyDeployment(cc, component, &deployment, frontend)
+		return ctrl.SetControllerReference(&cc, &deployment, r.Scheme)
 	})
 	if err != nil {
 		return fmt.Errorf("could not create or update pod: %w", err)
 	}
 	if op != controllerutil.OperationResultNone {
-		r.log.Info("reconcile pod successfully", "operation", op)
+		log.Info("reconcile pod successfully", "operation", op)
 	}
 	return nil
 }
