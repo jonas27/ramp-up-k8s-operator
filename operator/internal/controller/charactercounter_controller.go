@@ -39,8 +39,6 @@ type CharacterCounterReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-type CharacterCounterStep struct{}
-
 //+kubebuilder:rbac:groups=ramp-up.joe.ionos.io,resources=charactercounters,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ramp-up.joe.ionos.io,resources=charactercounters/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=ramp-up.joe.ionos.io,resources=charactercounters/finalizers,verbs=update
