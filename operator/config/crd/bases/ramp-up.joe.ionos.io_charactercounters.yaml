@@ -263,10 +263,10 @@ spec:
           status:
             description: CharacterCounterStatus defines the observed state of CharacterCounter
             properties:
-              type:
+              condition:
                 type: string
             required:
-            - type
+            - condition
             type: object
         type: object
     served: true

@@ -29,20 +29,20 @@ type CharacterCounterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Namespace string            `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
-	Labels    map[string]string `json:"labels,omitempty" protobuf:"bytes,11,rep,name=labels"`
+	Namespace string            `json:"namespace,omitempty"`
+	Labels    map[string]string `json:"labels,omitempty"`
 
 	Frontend CharacterCounterComponent `json:"frontend"`
 	Server   CharacterCounterComponent `json:"server"`
 }
 
 type CharacterCounterComponent struct {
-	Name         string                 `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
-	Image        string                 `json:"image,omitempty" protobuf:"bytes,2,opt,name=image"`
-	Replicas     *int32                 `json:"replicas,omitempty" protobuf:"varint,1,opt,name=frontendReplicas"`
-	Selector     map[string]string      `json:"selector,omitempty" protobuf:"bytes,2,rep,name=selector"`
-	Ports        []corev1.ContainerPort `json:"ports,omitempty" patchStrategy:"merge" patchMergeKey:"port" protobuf:"bytes,6,rep,name=ports"`
-	ServicePorts []corev1.ServicePort   `json:"servicePorts,omitempty" patchStrategy:"merge" patchMergeKey:"servicePorts" protobuf:"bytes,1,rep,name=servicePorts"`
+	Name         string                 `json:"name,omitempty"`
+	Image        string                 `json:"image,omitempty"`
+	Replicas     *int32                 `json:"replicas,omitempty"`
+	Selector     map[string]string      `json:"selector,omitempty"`
+	Ports        []corev1.ContainerPort `json:"ports,omitempty"`
+	ServicePorts []corev1.ServicePort   `json:"servicePorts,omitempty"`
 }
 
 type CharacterCounterCondition string
@@ -58,7 +58,7 @@ type CharacterCounterStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Condition CharacterCounterCondition `json:"type" protobuf:"bytes,1,opt,name=type,casttype=condition"`
+	Condition CharacterCounterCondition `json:"condition"`
 }
 
 //+kubebuilder:object:root=true
