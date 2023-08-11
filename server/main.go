@@ -63,8 +63,9 @@ type server struct {
 	pb.UnimplementedCharacterCounterServer
 }
 
-func (s *server) CountCharacters(_ context.Context, req *pb.CountCharactersRequest) (*pb.CountCharactersResponse, error) { //nolint:lll
-	chars := uint64(binary.BigEndian.Uint64([]byte(os.Getenv("CC_STRING"))))
+func (s *server) CountCharacters(_ context.Context, _ *pb.CountCharactersRequest) (*pb.CountCharactersResponse, error) { //nolint:lll
+	bytes := []byte(os.Getenv("CC_STRING"))
+	chars := binary.BigEndian.Uint64(bytes)
 	return &pb.CountCharactersResponse{Characters: chars}, nil
 }
 

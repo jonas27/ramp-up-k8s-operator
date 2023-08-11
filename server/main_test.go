@@ -37,10 +37,11 @@ func bufDialer(context.Context, string) (net.Conn, error) {
 	return dial, nil
 }
 
+//nolint:paralleltest
 func TestCountCharacters(t *testing.T) {
-	t.Parallel()
-
 	initServer()
+
+	t.Setenv("CC_STRING", "testtest1")
 
 	ctx := context.Background()
 	conn, err := grpc.DialContext(ctx, "bufnet",
@@ -57,5 +58,5 @@ func TestCountCharacters(t *testing.T) {
 		t.Fatalf("CountCharacters failed: %v", err)
 	}
 
-	assert.Equal(t, uint64(16), resp.Characters, "they should be equal")
+	assert.Equal(t, uint64(0x7465737474657374), resp.Characters, "they should be equal")
 }
