@@ -1,0 +1,43 @@
+apiVersion: ramp-up.joe.ionos.io/v1alpha1
+kind: CharacterCounter
+metadata:
+  name: character-counter
+  namespace: test
+spec:
+  labels:
+    app: test
+
+  namespace: test
+
+  frontend:
+    selector:
+      app: frontend
+    name: frontend
+    image: "ramp-up-k8s-operator/frontend:v0.0.1"
+    replicas: 1
+    ports:
+      - containerPort: 8080
+        name: http
+    servicePorts:
+      - port: 80
+        name: http
+        targetPort: http
+
+  server:
+    name: server
+    image: "ramp-up-k8s-operator/server:v0.0.1"
+    replicas: 1
+    selector:
+      app: server
+    ports:
+      - containerPort: 8000
+        name: grpc
+      - containerPort: 8001
+        name: http
+    servicePorts:
+      - port: 80
+        name: grpc
+        targetPort: grpc
+      - port: 8001
+        name: http
+        targetPort: http
