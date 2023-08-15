@@ -116,7 +116,6 @@ func (r *CharacterCounterReconciler) reconcileDeployement(ctx context.Context, l
 		args = append(args, "-grpc-addr", fmt.Sprintf("%s:80", cc.Spec.Server.Name))
 	}
 	deployment := appsv1.Deployment{
-		TypeMeta: metav1.TypeMeta{APIVersion: appsv1.SchemeGroupVersion.String(), Kind: "Deployment"},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      component.Name,
 			Namespace: cc.Spec.Namespace,
